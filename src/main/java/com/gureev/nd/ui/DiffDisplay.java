@@ -148,8 +148,8 @@ public class DiffDisplay extends Application {
 
         Label leftLabel = new Label();
         Label rightLabel = new Label();
-        leftLabel.setText(source.getName());
-        rightLabel.setText(target.getName());
+        leftLabel.setText(source.getAbsolutePath());
+        rightLabel.setText(target.getAbsolutePath());
 
         ScrollPane leftScrollPane = new ScrollPane(textFlowLeft);
         ScrollPane rightScrollPane = new ScrollPane(textFlowRight);
