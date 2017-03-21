@@ -6,7 +6,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -27,6 +29,7 @@ import static javafx.scene.paint.Color.*;
  */
 public class DiffDisplay extends Application {
     private static File source;
+    private static File target;
     private static List<Chunk> inserts, changes, deletes;
     private static final Font FONT = new Font("Courier New", 14);
     private static final int WIDTH = 500;
@@ -38,54 +41,46 @@ public class DiffDisplay extends Application {
 
     private List<Text> sourceAsText;
 
-    public static void setParameters(File sourceFile, List<Chunk> insertsChunks, List<Chunk> changesChunks,
+    public static void setParameters(File sourceFile, File targetFile, List<Chunk> insertsChunks, List<Chunk> changesChunks,
                                      List<Chunk> deletesChunks) {
         source = sourceFile;
+        target = targetFile;
         inserts = insertsChunks;
         changes = changesChunks;
         deletes = deletesChunks;
     }
 
-    private List<Text> formUpdatedNodes() {
-        List<Text> result = new ArrayList<>();
-
-        for (Text node : sourceAsText) {
-            Text newNode = new Text();
-            newNode.setFont(FONT);
-            newNode.setText(node.getText());
-            result.add(newNode);
-        }
+    private List<Text> formUpdatedNodes() throws FileNotFoundException {
+        List<Text> result = formOldNodes(target);
 
         for (Chunk insert : inserts) {
             for (int i = insert.getPosition(); i < insert.getPosition() + insert.size(); i++) {
                 Text node = formatInserted(insert.getLines().get(i - insert.getPosition()).toString());
-                result.add(i, node);
+                result.set(i, node);
             }
         }
 
         for (Chunk change : changes) {
-            result.remove(change.getPosition());
             for (int i = change.getPosition(); i < change.getPosition() + change.size(); i++) {
                 Text node = formatChanged(change.getLines().get(i - change.getPosition()).toString());
-                result.add(i, node);
+                result.set(i, node);
             }
         }
 
         for (Chunk delete : deletes) {
-            Text node = result.get(delete.getPosition());
-            node.setFill(DELETED);
+            Text node = formatDeleted("deleted line");
+            result.add(delete.getPosition(), node);
         }
 
         return result;
     }
 
-    private List<Text> formOldNodes() throws FileNotFoundException {
+    private List<Text> formOldNodes(File source) throws FileNotFoundException {
         List<Text> result = new ArrayList<>();
         Scanner scanner = new Scanner(source);
         while (scanner.hasNextLine()) {
             result.add(formatUnchanged(scanner.nextLine()));
         }
-        sourceAsText = result;
         return result;
     }
 
@@ -116,6 +111,13 @@ public class DiffDisplay extends Application {
         return text1;
     }
 
+    private Text formatDeleted(String line) {
+        Text text1 = new Text(line + "\n");
+        text1.setFont(FONT);
+        text1.setFill(DELETED);
+        return text1;
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
         TextFlow textFlowLeft = new TextFlow();
@@ -123,7 +125,8 @@ public class DiffDisplay extends Application {
         TextFlow textFlowRight = new TextFlow();
         textFlowRight.setPadding(new Insets(10));
 
-        List<Text> original = formOldNodes();
+        List<Text> original = formOldNodes(source);
+        sourceAsText = original;
         List<Text> updated = formUpdatedNodes();
 
         original = addLineNumber(original);
@@ -132,8 +135,8 @@ public class DiffDisplay extends Application {
         textFlowLeft.getChildren().addAll(original);
         textFlowRight.getChildren().addAll(updated);
 
-        textFlowLeft.setPrefSize((WIDTH - 20)/2, HEIGHT/2);
-        textFlowRight.setPrefSize((WIDTH - 20)/2, HEIGHT/2);
+        textFlowLeft.setPrefSize((WIDTH - 20) / 2, HEIGHT / 2);
+        textFlowRight.setPrefSize((WIDTH - 20) / 2, HEIGHT / 2);
 
         ScrollPane left = new ScrollPane(textFlowLeft);
         ScrollPane right = new ScrollPane(textFlowRight);
@@ -143,9 +146,11 @@ public class DiffDisplay extends Application {
         right.setFitToWidth(true);
 
         HBox hBox = new HBox();
-        hBox.setFillHeight(true);
         hBox.getChildren().add(left);
         hBox.getChildren().add(right);
+        HBox.setHgrow(left, Priority.ALWAYS);
+        HBox.setHgrow(right, Priority.ALWAYS);
+
         Scene scene = new Scene(hBox, WIDTH, HEIGHT, Color.LIGHTGRAY);
         stage.setTitle("Diff Visualizer");
         stage.setScene(scene);

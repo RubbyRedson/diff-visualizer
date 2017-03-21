@@ -24,11 +24,11 @@ public class Main {
         Path second = Paths.get(args[1]);
 
         FileComparator fileComparator = new FileComparator(first.toFile(), second.toFile());
-        display(first.toFile(), fileComparator);
+        display(first.toFile(), second.toFile(), fileComparator);
     }
 
-    private static void display(File source, FileComparator fileComparator) throws IOException {
-        DiffDisplay.setParameters(source, fileComparator.getInsertsFromOriginal(), fileComparator.getChangesFromOriginal(),
+    private static void display(File source, File target, FileComparator fileComparator) throws IOException {
+        DiffDisplay.setParameters(source, target, fileComparator.getInsertsFromOriginal(), fileComparator.getChangesFromOriginal(),
                 fileComparator.getDeletesFromOriginal());
         new Thread(() -> Application.launch(DiffDisplay.class)).start();
     }
