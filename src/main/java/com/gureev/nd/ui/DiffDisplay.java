@@ -1,6 +1,7 @@
 package com.gureev.nd.ui;
 
 import difflib.Chunk;
+import difflib.Delta;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -31,6 +32,7 @@ public class DiffDisplay extends Application {
     private static File source;
     private static File target;
     private static List<Chunk> inserts, changes, deletes;
+    private static List<Delta> deltas;
     private static final Font FONT = new Font("Courier New", 14);
     private static final int WIDTH = 500;
     private static final int HEIGHT = 150;
@@ -42,12 +44,13 @@ public class DiffDisplay extends Application {
     private List<Text> sourceAsText;
 
     public static void setParameters(File sourceFile, File targetFile, List<Chunk> insertsChunks, List<Chunk> changesChunks,
-                                     List<Chunk> deletesChunks) {
+                                     List<Chunk> deletesChunks, List<Delta> delta) {
         source = sourceFile;
         target = targetFile;
         inserts = insertsChunks;
         changes = changesChunks;
         deletes = deletesChunks;
+        deltas = delta;
     }
 
     private List<Text> formUpdatedNodes() throws FileNotFoundException {
@@ -67,9 +70,14 @@ public class DiffDisplay extends Application {
             }
         }
 
-        for (Chunk delete : deletes) {
-            Text node = formatDeleted("deleted line");
-            result.add(delete.getPosition(), node);
+        for (Delta delta : deltas) {
+            if (delta.getType().equals(Delta.TYPE.DELETE)) {
+                for (int i = delta.getRevised().getPosition(); i < delta.getRevised().getPosition()
+                        + delta.getOriginal().size(); i++) {
+                    Text node = formatDeleted(delta.getOriginal().getLines().get(i - delta.getRevised().getPosition()).toString());
+                    result.add(i, node);
+                }
+            }
         }
 
         return result;
