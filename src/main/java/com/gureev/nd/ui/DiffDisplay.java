@@ -67,13 +67,17 @@ public class DiffDisplay extends Application {
                         result.set(i, node);
                     }
                     break;
-                case DELETE:
-                    for (int i = delta.getRevised().getPosition(); i < delta.getRevised().getPosition()
-                            + delta.getOriginal().size(); i++) {
-                        Text node = formatDeleted(delta.getOriginal().getLines().get(i - delta.getRevised().getPosition()).toString());
-                        result.add(i, node);
-                    }
-                    break;
+            }
+        }
+
+        for (Delta delta : deltas) {
+            if (delta.getType().equals(Delta.TYPE.DELETE)) {
+                for (int i = delta.getRevised().getPosition(); i < delta.getRevised().getPosition()
+                        + delta.getOriginal().size(); i++) {
+                    Text node = formatDeleted(delta.getOriginal().getLines().get(i - delta.getRevised().getPosition()).toString());
+                    result.add(i, node);
+                }
+                break;
             }
         }
 
