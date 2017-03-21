@@ -7,10 +7,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -144,18 +146,30 @@ public class DiffDisplay extends Application {
         textFlowLeft.setPrefSize((width - 20) / 2, height / 2);
         textFlowRight.setPrefSize((width - 20) / 2, height / 2);
 
-        ScrollPane left = new ScrollPane(textFlowLeft);
-        ScrollPane right = new ScrollPane(textFlowRight);
-        left.setFitToHeight(true);
-        left.setFitToWidth(true);
-        right.setFitToHeight(true);
-        right.setFitToWidth(true);
+        Label leftLabel = new Label();
+        Label rightLabel = new Label();
+        leftLabel.setText(source.getName());
+        rightLabel.setText(target.getName());
+
+        ScrollPane leftScrollPane = new ScrollPane(textFlowLeft);
+        ScrollPane rightScrollPane = new ScrollPane(textFlowRight);
+        leftScrollPane.setFitToHeight(true);
+        leftScrollPane.setFitToWidth(true);
+        rightScrollPane.setFitToHeight(true);
+        rightScrollPane.setFitToWidth(true);
+
+        VBox leftBox = new VBox();
+        leftBox.getChildren().addAll(leftLabel, leftScrollPane);
+        VBox rightBox = new VBox();
+        rightBox.getChildren().addAll(rightLabel, rightScrollPane);
+        VBox.setVgrow(leftScrollPane, Priority.ALWAYS);
+        VBox.setVgrow(rightScrollPane, Priority.ALWAYS);
 
         HBox hBox = new HBox();
-        hBox.getChildren().add(left);
-        hBox.getChildren().add(right);
-        HBox.setHgrow(left, Priority.ALWAYS);
-        HBox.setHgrow(right, Priority.ALWAYS);
+        hBox.getChildren().add(leftBox);
+        hBox.getChildren().add(rightBox);
+        HBox.setHgrow(leftBox, Priority.ALWAYS);
+        HBox.setHgrow(rightBox, Priority.ALWAYS);
 
         Scene scene = new Scene(hBox, width, height, Color.LIGHTGRAY);
         stage.setTitle("Diff Visualizer");

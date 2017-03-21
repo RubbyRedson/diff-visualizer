@@ -1,6 +1,5 @@
 package com.gureev.nd.diff;
 
-import difflib.Chunk;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -21,6 +20,7 @@ public class FileComparator {
         this.original = original;
         this.revised = revised;
     }
+    
     public List<Delta> getDeltas() throws IOException {
 
         final List<String> originalFileLines = fileToLines(original);
