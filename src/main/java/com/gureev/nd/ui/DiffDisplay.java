@@ -31,6 +31,10 @@ public class DiffDisplay extends Application {
     private static final int WIDTH = 500;
     private static final int HEIGHT = 150;
 
+    private static final Color INSERTED = GREEN;
+    private static final Color CHANGED = OLIVE;
+    private static final Color DELETED = DARKRED;
+
     private List<Text> sourceAsText;
 
     public static void setParameters(File sourceFile, List<Chunk> insertsChunks, List<Chunk> changesChunks,
@@ -43,46 +47,43 @@ public class DiffDisplay extends Application {
 
     private List<Text> formUpdatedNodes() {
         List<Text> result = new ArrayList<>();
+
         for (Text node : sourceAsText) {
             Text newNode = new Text();
             newNode.setFont(FONT);
             newNode.setText(node.getText());
             result.add(newNode);
         }
+
         for (Chunk change : changes) {
             int index = change.getPosition() - 1;
             result.remove(index);
             for (int i = change.getPosition(); i < change.getPosition() + change.size(); i++) {
-                Text node = new Text();
-                node.setText(change.getLines().get(i - change.getPosition()).toString() + "\n");
-                node.setFont(FONT);
-                node.setFill(YELLOW);
+                Text node = formatChanged(change.getLines().get(i - change.getPosition()).toString());
                 result.add(i - 1, node);
             }
         }
+
         for (Chunk insert : inserts) {
             for (int i = insert.getPosition(); i < insert.getPosition() + insert.size(); i++) {
-                Text node = new Text();
-                node.setText(insert.getLines().get(i - insert.getPosition()).toString() + "\n");
+                Text node = formatInserted(insert.getLines().get(i - insert.getPosition()).toString());
                 result.add(i, node);
-                node.setFill(GREEN);
             }
         }
+
         for (Chunk delete : deletes) {
             Text node = result.get(delete.getPosition());
-            node.setFill(RED);
+            node.setFill(DELETED);
         }
+
         return result;
     }
 
     private List<Text> formOldNodes() throws FileNotFoundException {
         List<Text> result = new ArrayList<>();
         Scanner scanner = new Scanner(source);
-        int line = 1;
         while (scanner.hasNextLine()) {
-            //result.add(formatLineNumber(line));
             result.add(formatUnchanged(scanner.nextLine()));
-            line++;
         }
         sourceAsText = result;
         return result;
@@ -98,6 +99,20 @@ public class DiffDisplay extends Application {
     private Text formatUnchanged(String line) {
         Text text1 = new Text(line + "\n");
         text1.setFont(FONT);
+        return text1;
+    }
+
+    private Text formatInserted(String line) {
+        Text text1 = new Text(line + "\n");
+        text1.setFont(FONT);
+        text1.setFill(INSERTED);
+        return text1;
+    }
+
+    private Text formatChanged(String line) {
+        Text text1 = new Text(line + "\n");
+        text1.setFont(FONT);
+        text1.setFill(CHANGED);
         return text1;
     }
 
