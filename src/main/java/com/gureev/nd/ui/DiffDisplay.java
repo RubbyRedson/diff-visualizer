@@ -51,6 +51,7 @@ public class DiffDisplay extends Application {
     private List<Text> formUpdatedNodes() throws FileNotFoundException {
         List<Text> result = formOldNodes(target);
 
+        //First insertions and changes are processed, as they depend on line numbers. After that deletions are inserted.
         for (Delta delta : deltas) {
             switch (delta.getType()) {
                 case INSERT:
@@ -133,6 +134,7 @@ public class DiffDisplay extends Application {
         int width = (int) (primaryScreenBounds.getWidth() / 2);
         int height = (int) (primaryScreenBounds.getHeight() / 2);
 
+        //Set up TextFlows
         TextFlow textFlowLeft = new TextFlow();
         textFlowLeft.setPadding(new Insets(10));
         TextFlow textFlowRight = new TextFlow();
@@ -150,11 +152,13 @@ public class DiffDisplay extends Application {
         textFlowLeft.setPrefSize((width - 20) / 2, height / 2);
         textFlowRight.setPrefSize((width - 20) / 2, height / 2);
 
+        //Set up labels that will be above text flows and will contain file names
         Label leftLabel = new Label();
         Label rightLabel = new Label();
         leftLabel.setText(source.getAbsolutePath());
         rightLabel.setText(target.getAbsolutePath());
 
+        //Scroll panes to wrap up text flows, so they will be scrollable
         ScrollPane leftScrollPane = new ScrollPane(textFlowLeft);
         ScrollPane rightScrollPane = new ScrollPane(textFlowRight);
         leftScrollPane.setFitToHeight(true);
@@ -162,6 +166,7 @@ public class DiffDisplay extends Application {
         rightScrollPane.setFitToHeight(true);
         rightScrollPane.setFitToWidth(true);
 
+        //Vertical boxes for labels and scrollpanes, labels are above scroll panes
         VBox leftBox = new VBox();
         leftBox.getChildren().addAll(leftLabel, leftScrollPane);
         VBox rightBox = new VBox();
@@ -169,6 +174,7 @@ public class DiffDisplay extends Application {
         VBox.setVgrow(leftScrollPane, Priority.ALWAYS);
         VBox.setVgrow(rightScrollPane, Priority.ALWAYS);
 
+        //Horizontal box, inner vertical boxes are side by side
         HBox hBox = new HBox();
         hBox.getChildren().add(leftBox);
         hBox.getChildren().add(rightBox);

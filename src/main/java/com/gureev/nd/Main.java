@@ -15,6 +15,12 @@ import java.util.Scanner;
  * Created by Nick on 3/18/2017.
  */
 public class Main {
+
+    /**
+     * Main method, receives two file pathes, compares them using diff and visualizes the output
+     * @param args - should contain two valid file paths that will be compared
+     * @throws IOException on file not found
+     */
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
             throw new IllegalArgumentException("The input must contain two paths to files that should be compared!");
