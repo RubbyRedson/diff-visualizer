@@ -15,37 +15,12 @@ import java.util.List;
 public class FileComparator {
 
     private final File original;
-
     private final File revised;
 
     public FileComparator(File original, File revised) {
         this.original = original;
         this.revised = revised;
     }
-
-    public List<Chunk> getChangesFromOriginal() throws IOException {
-        return getChunksByType(Delta.TYPE.CHANGE);
-    }
-
-    public List<Chunk> getInsertsFromOriginal() throws IOException {
-        return getChunksByType(Delta.TYPE.INSERT);
-    }
-
-    public List<Chunk> getDeletesFromOriginal() throws IOException {
-        return getChunksByType(Delta.TYPE.DELETE);
-    }
-
-    private List<Chunk> getChunksByType(Delta.TYPE type) throws IOException {
-        final List<Chunk> listOfChanges = new ArrayList<Chunk>();
-        final List<Delta> deltas = getDeltas();
-        for (Delta delta : deltas) {
-            if (delta.getType() == type) {
-                listOfChanges.add(delta.getRevised());
-            }
-        }
-        return listOfChanges;
-    }
-
     public List<Delta> getDeltas() throws IOException {
 
         final List<String> originalFileLines = fileToLines(original);

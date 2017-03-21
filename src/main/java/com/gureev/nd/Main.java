@@ -28,8 +28,7 @@ public class Main {
     }
 
     private static void display(File source, File target, FileComparator fileComparator) throws IOException {
-        DiffDisplay.setParameters(source, target, fileComparator.getInsertsFromOriginal(), fileComparator.getChangesFromOriginal(),
-                fileComparator.getDeletesFromOriginal(), fileComparator.getDeltas());
+        DiffDisplay.setParameters(source, target, fileComparator.getDeltas());
         new Thread(() -> Application.launch(DiffDisplay.class)).start();
     }
 

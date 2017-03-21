@@ -31,7 +31,6 @@ import static javafx.scene.paint.Color.*;
 public class DiffDisplay extends Application {
     private static File source;
     private static File target;
-    private static List<Chunk> inserts, changes, deletes;
     private static List<Delta> deltas;
     private static final Font FONT = new Font("Courier New", 14);
     private static final int WIDTH = 500;
@@ -41,42 +40,38 @@ public class DiffDisplay extends Application {
     private static final Color CHANGED = OLIVE;
     private static final Color DELETED = DARKRED;
 
-    private List<Text> sourceAsText;
-
-    public static void setParameters(File sourceFile, File targetFile, List<Chunk> insertsChunks, List<Chunk> changesChunks,
-                                     List<Chunk> deletesChunks, List<Delta> delta) {
+    public static void setParameters(File sourceFile, File targetFile, List<Delta> delta) {
         source = sourceFile;
         target = targetFile;
-        inserts = insertsChunks;
-        changes = changesChunks;
-        deletes = deletesChunks;
         deltas = delta;
     }
 
     private List<Text> formUpdatedNodes() throws FileNotFoundException {
         List<Text> result = formOldNodes(target);
 
-        for (Chunk insert : inserts) {
-            for (int i = insert.getPosition(); i < insert.getPosition() + insert.size(); i++) {
-                Text node = formatInserted(insert.getLines().get(i - insert.getPosition()).toString());
-                result.set(i, node);
-            }
-        }
-
-        for (Chunk change : changes) {
-            for (int i = change.getPosition(); i < change.getPosition() + change.size(); i++) {
-                Text node = formatChanged(change.getLines().get(i - change.getPosition()).toString());
-                result.set(i, node);
-            }
-        }
-
         for (Delta delta : deltas) {
-            if (delta.getType().equals(Delta.TYPE.DELETE)) {
-                for (int i = delta.getRevised().getPosition(); i < delta.getRevised().getPosition()
-                        + delta.getOriginal().size(); i++) {
-                    Text node = formatDeleted(delta.getOriginal().getLines().get(i - delta.getRevised().getPosition()).toString());
-                    result.add(i, node);
-                }
+            switch (delta.getType()) {
+                case INSERT:
+                    Chunk insert = delta.getRevised();
+                    for (int i = insert.getPosition(); i < insert.getPosition() + insert.size(); i++) {
+                        Text node = formatInserted(insert.getLines().get(i - insert.getPosition()).toString());
+                        result.set(i, node);
+                    }
+                    break;
+                case CHANGE:
+                    Chunk change = delta.getRevised();
+                    for (int i = change.getPosition(); i < change.getPosition() + change.size(); i++) {
+                        Text node = formatChanged(change.getLines().get(i - change.getPosition()).toString());
+                        result.set(i, node);
+                    }
+                    break;
+                case DELETE:
+                    for (int i = delta.getRevised().getPosition(); i < delta.getRevised().getPosition()
+                            + delta.getOriginal().size(); i++) {
+                        Text node = formatDeleted(delta.getOriginal().getLines().get(i - delta.getRevised().getPosition()).toString());
+                        result.add(i, node);
+                    }
+                    break;
             }
         }
 
@@ -134,7 +129,6 @@ public class DiffDisplay extends Application {
         textFlowRight.setPadding(new Insets(10));
 
         List<Text> original = formOldNodes(source);
-        sourceAsText = original;
         List<Text> updated = formUpdatedNodes();
 
         original = addLineNumber(original);
