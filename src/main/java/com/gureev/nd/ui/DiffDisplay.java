@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -55,18 +56,17 @@ public class DiffDisplay extends Application {
             result.add(newNode);
         }
 
-        for (Chunk change : changes) {
-            int index = change.getPosition() - 1;
-            result.remove(index);
-            for (int i = change.getPosition(); i < change.getPosition() + change.size(); i++) {
-                Text node = formatChanged(change.getLines().get(i - change.getPosition()).toString());
-                result.add(i - 1, node);
-            }
-        }
-
         for (Chunk insert : inserts) {
             for (int i = insert.getPosition(); i < insert.getPosition() + insert.size(); i++) {
                 Text node = formatInserted(insert.getLines().get(i - insert.getPosition()).toString());
+                result.add(i, node);
+            }
+        }
+
+        for (Chunk change : changes) {
+            result.remove(change.getPosition());
+            for (int i = change.getPosition(); i < change.getPosition() + change.size(); i++) {
+                Text node = formatChanged(change.getLines().get(i - change.getPosition()).toString());
                 result.add(i, node);
             }
         }
@@ -120,9 +120,7 @@ public class DiffDisplay extends Application {
     public void start(Stage stage) throws Exception {
         TextFlow textFlowLeft = new TextFlow();
         textFlowLeft.setPadding(new Insets(10));
-        textFlowLeft.setPrefSize((WIDTH - 20)/2, HEIGHT/2);
         TextFlow textFlowRight = new TextFlow();
-        textFlowRight.setPrefSize((WIDTH - 20)/2, HEIGHT/2);
         textFlowRight.setPadding(new Insets(10));
 
         List<Text> original = formOldNodes();
@@ -134,11 +132,21 @@ public class DiffDisplay extends Application {
         textFlowLeft.getChildren().addAll(original);
         textFlowRight.getChildren().addAll(updated);
 
+        textFlowLeft.setPrefSize((WIDTH - 20)/2, HEIGHT/2);
+        textFlowRight.setPrefSize((WIDTH - 20)/2, HEIGHT/2);
+
+        ScrollPane left = new ScrollPane(textFlowLeft);
+        ScrollPane right = new ScrollPane(textFlowRight);
+        left.setFitToHeight(true);
+        left.setFitToWidth(true);
+        right.setFitToHeight(true);
+        right.setFitToWidth(true);
+
         HBox hBox = new HBox();
-        hBox.getChildren().add(textFlowLeft);
-        hBox.getChildren().add(textFlowRight);
-        Group group = new Group(hBox);
-        Scene scene = new Scene(group, WIDTH, HEIGHT, Color.LIGHTGRAY);
+        hBox.setFillHeight(true);
+        hBox.getChildren().add(left);
+        hBox.getChildren().add(right);
+        Scene scene = new Scene(hBox, WIDTH, HEIGHT, Color.LIGHTGRAY);
         stage.setTitle("Diff Visualizer");
         stage.setScene(scene);
         stage.show();
